@@ -231,6 +231,18 @@ Vue-devtools
 
 
 
+* 处理函数只有一行时候可以在调用出简写
+
+```html
+<button @click="count++">
+    +1
+</button>
+```
+
+
+
+
+
 ##### 调用vue对象内部的数据和方法
 
 > 通过对象名称调用
@@ -1140,3 +1152,448 @@ axios.post('url地址',{
   * 通过添加 `lang`指定css预处理语言
   *  ` <style lang="less">`
 
+
+
+#### 组件之间的父子关系
+
+* 组件在封装的时候**彼此之间是相互独立的**，不存在父子关系
+* 在使用组件的时候，**根据彼此的嵌套关系**，才形成了父子关系，兄弟关系
+
+
+
+
+
+
+
+
+
+#### 使用组件的三个步骤
+
+* 在根组件（父）中**导入需要而组件**
+* 使用**components** 节点注册组件
+* **以标签形式** 使用刚才的组件
+
+
+
+> 在script 模块导入并 注册组件
+
+```vue
+<script>
+import Left from './components/Left.vue'
+import Right from "@/components/Right.vue";
+export default {
+  data(){
+
+  },
+  components:{
+    Left,Right
+  }
+}
+</script>
+```
+
+> 以标签形式使用组件
+
+```vue
+<template>
+  <div class="app-container">
+    <h1>App 根组件</h1>
+    <hr />
+
+    <div class="box">
+      <!-- 渲染 Left 组件和 Right 组件 -->
+      <Left></Left>
+      <Right></Right>
+        
+    </div>
+  </div>
+</template>
+```
+
+
+
+
+
+
+
+* 通过 *components*注册的是**私有子组件**
+
+  * 在组件 A 的 components 节点下，注册了组件 F 
+
+  * 则组件F只能用在组件 A中，不能用在组件C中
+
+
+
+
+
+* **注册全局组件**
+  * 在 `main.js`入口文件中。
+  * 通过 `Vue.component()`方法，可以注册全局组件
+
+```js\
+// 导入需要全局注册的组件
+import Count from '@/components/Count.vue'
+Vue.component('MyCount',Count)
+```
+
+
+
+### 组件的 props
+
+组件的**自定义属性**，在**封装通用组件**的时候，合理的使用 props 可以极大地**提升组件的复用性**
+
+在不同的父组件中使用这个子组件的不同的初始值
+
+> props 是自定义属性，允许使用者通过自定义属性，为当前组件指定初始值
+>
+> 自定义属性的名字，是封装着自定义的
+
+```vue
+// Count.vue
+<template>
+  <div>
+    <h3>Count 组件</h3>
+    <p>count 的值是：{{ init }}</p>
+  </div>
+
+</template>
+
+<script>
+export default {
+  name: "Count",
+  props:['init'],
+  data(){
+    return {
+      count:0
+    }
+  }
+}
+</script>
+```
+
+```vur
+// Right.vue
+<template>
+  <div class="right-container">
+    <h3>Right 组件</h3>
+    <MyCount init="9"></MyCount>
+  </div>
+</template>
+
+```
+
+
+
+#### 结合 `v-bind`修改props传递类型
+
+* 加上 *v-bind*，后`""`里面变成了js代码，所以`init`变成了数字类型
+
+```vue
+<MyCount :init="9"></MyCount>
+```
+
+* 加上 *v-bind*，后`""`里面变成了js代码，也可以传递复杂的数据类型
+
+```vue
+<MyCount :init="message"></MyCount>
+// 不添加 `:` 则传递的是字符串message
+message:'biuuu'
+```
+
+
+
+
+
+
+
+#### props是只读的
+
+直接修改会报错
+
+
+
+> 在不同的组件内调用 Count.vue
+
+```vue
+// Count.vue
+<template>
+  <div>
+    <h3>Count 组件</h3>
+    <p>count 的值是：{{ count }}</p>
+    <button @click="count++">+1</button>
+  </div>
+
+</template>
+
+<script>
+export default {
+  name: "Count",
+  props:['init'],
+  data(){
+    return {
+      count:this.init
+    }
+  }
+}
+</script>
+```
+
+```vue
+// Left.vue
+<template>
+  <div class="left-container">
+    <h3>Left 组件</h3>
+    <hr>
+<!--    使用了MyCount全局组件-->
+    <MyCount :init="0"></MyCount>
+    <hr>
+    <MyCount :init="4"></MyCount>
+  </div>
+</template>
+```
+
+
+
+#### props的属性值
+
+* default
+
+在外界使用 props所在组件时，但是并没有定义属性值，则会出现undefined
+
+> 将props 定义为对象
+
+```vue
+props:{
+	default:0
+}
+```
+
+* type
+
+> 定义类型
+
+```vue
+props:{
+	default:0,
+	type:Number
+}
+```
+
+* required
+
+> 必填项校验
+
+添加required后，**即使有默认值，不传递参数也会报错**
+
+```vur
+
+props:{
+	default:0,
+	type:Number,
+	required:true,
+}
+```
+
+
+
+### 组件样式冲突问题
+
+> 虽然不同的组件是独立的，但是在整个页面中是一体的，修改同一个标签或类名的样式会影响所有
+
+* **解决方法**
+
+#### 通过属性选择器
+
+* 在一个vue组件里给所有的标签都**添加同一个自定义属性**
+
+* 而且要每个组件唯一,
+
+* 在定义样式的时候通过属性选择定义
+
+```vue
+<template>
+// 添加属性名为 data-001
+  <div class="right-container" data-001>
+    <h3 data-001>Right 组件</h3>
+    <MyCount :init="9" data-001></MyCount>
+  </div>
+</template>
+
+<script>
+export default {}
+</script>
+
+<style lang="less">
+.right-container {
+  padding: 0 20px 20px;
+  background-color: lightskyblue;
+  min-height: 250px;
+  flex: 1;
+}
+    // 属性选择器，修改样式
+h3[data-001]{
+    color: #f50000;
+}
+</style>
+
+```
+
+
+
+####  **scoped**
+
+> 通过属性选择器的原理**自动添加属性**
+>
+> 实现单独的组件的样式只服务于这个组件
+
+* **不添加*scoped*的样式会变成全局样式**
+
+```vue
+<style lang="less" scoped>
+.left-container {
+  padding: 0 20px 20px;
+  background-color: orange;
+  min-height: 250px;
+  flex: 1;
+}
+h3{
+  color: white;
+}
+</style>
+```
+
+
+
+
+
+#### /deep/
+
+> 在父组件中直接修改子组件的样式
+
+* 通常用于修改第三方默认组件的样式
+
+```vue
+/deep/ h5{
+	color:red;
+}
+```
+
+
+
+### 组件的生命周期
+
+> 生命周期是指 一个组件从**创建**->**运行**->**销毁**的阶段，强调的是一个时间段
+
+
+
+#### 生命周期函数
+
+> vue提供的内置函数，伴随着组件的生命周期，**自动按序执行**
+
+![组件生命周期的分类](D:\Code\md\he\img\组件生命周期的分类.png)
+
+
+
+![生命周期](D:\Code\md\he\img\生命周期.png)
+
+##### 组件创建时
+
+只会触发一次创建时的转态
+
+###### *create状态*
+
+> 组件等已经创建好，
+>
+> 模板结构尚未生成
+>
+> 不能够操作DOM 
+
+在**created**阶段，通常会发起Ajax请求来获取数据
+
+
+
+###### *mounted*
+
+> 已经吧内存中的HTML结构渲染到浏览器，此时浏览器中已经**包含了当前组件的DOM结构**
+
+* 最早的操作DOM元素
+
+
+
+##### 组件运行时候
+
+最少执行0次（数据从未改变过），
+
+###### *beforeUpdate*
+
+> 数据发生变化时候触发
+
+> 拥有最新的数据，**将要重新渲染组件的模板结构**
+
+
+
+###### updated
+
+> 数据和 UI 已经完成了同步
+
+
+
+##### 组件销毁阶段
+
+###### beforeDestory
+
+> 将要销毁而还未销毁的时候
+
+
+
+###### destroyed
+
+> 组件已经被销毁
+
+
+
+### 组件之间的数据传递
+
+
+
+#### 父 向子传递
+
+> 自定义属性，通过props
+>
+> 父组件定义其值，子组件通过props接收
+
+
+
+#### 子向父传递
+
+> 自定义事件
+
+* 修改数据时候，通过`$emit()`触发自定义事件
+* 调用`$emit`就会触发事件
+
+```vue
+// 子组件
+methods:{
+	add(){
+	this.count++;
+	
+	// 通过$emit触发自定义事件
+	this.$emit('numchange',this.count)
+	}
+}
+```
+
+```vue
+// 父组件
+<Son @numchange="getNewCount"></Son>
+
+methods:{
+	getNewCount(val){
+	this.countFromSon = val
+}
+}
+```
+
+#### 兄弟组件之间的数据传递
+
+> EvenBus
