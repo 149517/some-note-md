@@ -1,3 +1,5 @@
+
+
 # vue2
 
 
@@ -28,13 +30,13 @@
 
 * MVVM
 
-![img](https://img-blog.csdnimg.cn/6b13efa04a1b47f0af6629ea2b327677.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAenp6enp6em9l,size_20,color_FFFFFF,t_70,g_se,x_16)
+![img](D:\Code\md\he\img\vue\MVVM.png)
 
 Model数据源，View视图，ViewModel就是Vue的实例
 
 
 
-![img](https://img-blog.csdnimg.cn/9e390ab94c6a4642af8b31d4ff2e0c48.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAenp6enp6em9l,size_20,color_FFFFFF,t_70,g_se,x_16)
+![img](D:\Code\md\he\img\vue\MVVM数据传递.png)
 
 
 
@@ -1079,8 +1081,16 @@ axios.post('url地址',{
 * 进入选择界面，
   * 前两个自动创建（Babel,
   * 第三个为手动创建
+* 项目创建
+* ![01](D:\Code\md\he\img\vue\01.jpg)
 
-![image-20220701212013627](D:\Code\md\he\img\vue\vue-cli成功创建.png)
+![01](D:\Code\md\he\img\vue\02.jpg)
+
+![01](D:\Code\md\he\img\vue\03.jpg)
+
+![01](D:\Code\md\he\img\vue\04.jpg)
+
+![01](D:\Code\md\he\img\vue\05.jpg)
 
 
 
@@ -1490,11 +1500,11 @@ h3{
 
 > vue提供的内置函数，伴随着组件的生命周期，**自动按序执行**
 
-![组件生命周期的分类](D:\Code\md\he\img\组件生命周期的分类.png)
+![组件生命周期的分类](D:\Code\md\he\img\vue\组件生命周期的分类.png)
 
 
 
-![生命周期](D:\Code\md\he\img\生命周期.png)
+![生命周期](D:\Code\md\he\img\vue\生命周期.png)
 
 ##### 组件创建时
 
@@ -1596,4 +1606,109 @@ methods:{
 
 #### 兄弟组件之间的数据传递
 
-> EvenBus
+> 在vue2之中，EvenBus
+
+* 创建`evebtBus.js`模块，向外共享一个 `Vue的实例对象`
+* 在数据**发送方**，调用`bus.$emit(‘事件名称’，要发的数据)`方法触发自定义事件
+* 在数据**接收方**，调用`bus.$on('事件名称'，事件处理函数)`方法注册一个自定义事件
+
+
+
+##### 现成的解决方案
+
+```js
+// EventBus.js
+import Vue from 'vue'
+// 向外共享 Vue 的实例对象
+export default new Vue()
+```
+
+```js
+// 数据的发送方
+import bus from './EventBus.js'
+export default {
+    data(){
+        return {
+            msg:'hello vue.js'
+        }
+    },
+    methods:{
+        sendMsg(){
+            bus.$emit('share',this.msg)
+        }
+    }
+}
+```
+
+```js
+// 数据的接收方
+import bus from './EventBus.js'
+export default {
+    data(){
+        return {
+            msgFromLeft;''
+        }
+    },
+    created(){
+        bus.$on('share',val=>{
+            this.msgFromLeft = val
+        })
+    }
+}
+```
+
+***
+
+ 
+
+### ref 引用
+
+> jquery 简化了操作DOM 的过程
+>
+> vue 基本不需要操作DOM。只需要维护好数据即可，数据驱动视图
+
+#### ref引用DOM元素
+
+> ref ,在不依赖JQuery的情况下，获取 DOM 元素或者组件的引用
+>
+> 在每一个 vue 的组件实例上，都包含着一个 `$ref`对象，里面储存着对应的DOM元素或者组件的引用，默认情况下，**组件的`$ref`指向一个空对象**
+
+* 在需要获取 DOM 元素的内部创建`ref`属性
+* 通过属性名获取
+
+```html
+<h1 ref='myh1'>
+    就可以通过，'myh1'获取到这个DOM
+</h1>
+    <button @click="change">点击改变</button>
+
+
+  methods:{
+    change(){
+      this.$refs.myh1.style.color = 'red';
+    }
+  },
+```
+
+
+
+#### ref引用组件
+
+> 可以通过`ref`，直接调用子组件中的方法
+
+
+
+##### this.$nextTick(cd)方法
+
+> 会把 cd 回调函数推迟到下一个DOM更新周期之后执行
+>
+> 当某些代码需要延迟到DOM渲染完毕时候执行
+>
+> 能够保证 cd 函数操作到最新的 DOM元素
+
+```js
+this.$nextTick(()=>{
+	this.$refs.ipRef.focus()
+})
+```
+
