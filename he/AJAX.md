@@ -792,6 +792,16 @@ $('#btn').on('click', function () {
 
 [axios]([axios (v1.0.0-alpha.1) - Axios 是一个基于 promise 的 HTTP 库,可以用在浏览器和 Node.js 中。 | BootCDN - Bootstrap 中文网开源项目免费 CDN 加速服务](https://www.bootcdn.cn/axios/))
 
+而` async/await `是一种建立在`Promise`之上的编写异步或非阻塞代码的新方法。`async` 是异步的意思，而 `await `是 `async wait`的简写，即异步等待。
+
+所以从语义上就很好理解 `async` 用于声明一个 函数 是异步的，而`await `用于等待一个异步方法执行完成。
+
+**那么想要同步使用数据的话，就可以使用 `async+await` 。**
+————————————————
+[原文链接：](https://blog.csdn.net/AiHuanhuan110/article/details/89603720)
+
+
+
 #### 服务端样式
 
 ```js

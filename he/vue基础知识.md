@@ -47,6 +47,8 @@ Model数据源，View视图，ViewModel就是Vue的实例
 > 自从22年6月27号左右开始，
 >
 > 先后学了webpack.ajax,还有es6部分内容
+>
+> 此部分完成时间0703
 
 
 
@@ -994,6 +996,16 @@ const {data:res} = await axios({
                 })
                 console.log(res.data);
 ```
+
+
+
+而` async/await `是一种建立在`Promise`之上的编写异步或非阻塞代码的新方法。`async` 是异步的意思，而 `await `是 `async wait`的简写，即异步等待。
+
+所以从语义上就很好理解 `async` 用于声明一个 函数 是异步的，而`await `用于等待一个异步方法执行完成。
+
+**那么想要同步使用数据的话，就可以使用 `async+await` 。**
+————————————————
+[原文链接：](https://blog.csdn.net/AiHuanhuan110/article/details/89603720)
 
 
 
