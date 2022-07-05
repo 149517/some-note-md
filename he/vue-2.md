@@ -290,10 +290,47 @@ Vue.directive(’color',function(el,binding)){
 
 
 
-[vue视频](https://www.bilibili.com/video/BV1zq4y1p7ga?p=167&share_source=copy_web)
-
-166
-
 ## ESLINt
 
-检查工具
+可组装的JavaScript和JSX检查工具
+
+> Eslint 规则查看
+
+[Eslint]([Getting Started with ESLint - ESLint中文](http://eslint.cn/docs/user-guide/getting-started))-->用户指南-->规则——>Ctrl_F搜索
+
+
+
+> EsLint 文件配置
+
+* `no-console`
+  * 代码中不允许出现console
+* `process.env.NODE_ENV === 'production' ? 'warn' : 'off'`
+  * 获取当前模式，如果处于开发模式则发出警告，发布时候则禁止
+* `debugger`
+  * 代码中不允许出现debugge
+  * 以代码的方式，打上断点
+
+
+
+> 常见错误
+
+*  no-trailing-spaces
+  *  禁用行尾空格
+* quotes
+  * 强制使用一致的反勾号、双引号或单引号
+
+.
+
+...
+
+### 修改错误
+
+> 忽略这类错误，相同的情况将不会再报错
+
+* 选择这个错误。
+* 在规则中找到，
+* 按照文档中的方法修改**配置文件**
+* 重启服务
+
+
+
