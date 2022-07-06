@@ -334,3 +334,444 @@ Vue.directive(’color',function(el,binding)){
 
 
 
+# 路由
+
+router，对应关系
+
+> SPA,单页面应用程序
+
+* 路由就是 Hash 地址和组件之间的对应关系
+  * 哈希地址相当于锚点链接`#`，页面产生上下跳转和历史记录的变化
+  * URL 中的`#`和`#`后面的都是Hash 地址
+
+
+
+### 路由的工作方式
+
+
+
+* 用户点击了页面上的路由链接
+* 导致**URL地址栏**中的**Hash值**发生了变化
+* **前端路由监听到了Hash地址的变化**
+* 前端路由把当前**Hash地址对应组件**渲染到浏览器
+
+
+
+>  路由变化事件`onhashchange`
+
+* 可以通过事件监听获取所点击的路由
+* 通过`switch`判断并给动态组件`component`赋值的方式
+* 实现手动界面切换
+
+
+
+### vue-router
+
+vue.js官方给出的**路由解决方案**
+
+> npm install vue-router@* -S --legacy-peer-deps
+
+* `--legacy-peer-deps`是一个错误修复
+
+
+
+#### 创建路由模块
+
+> src/router.index.js
+
+在src目录下创建router，index.js
+
+* 在 vue 中 `Vue.use()`是安装插件
+
+```js
+// index.js
+
+//src/router/index.js 就是当前项目的路由模块
+
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+
+// 调用 Vue.use()函数，把VueRouter 安装为 Vue插件
+
+Vue.use(VueRouter)
+
+// 创建路由实例对象
+const router = new VueRouter()
+
+// 向外共享路由实例对象
+export default router
+
+```
+
+> 在main.js 挂载路由实例
+
+```js
+import Vue from 'vue'
+import App from './App.vue'
+// 导入路由模块，达到路由实例对象
+import router from '@/router/index'
+
+// 导入 bootstrap 样式
+import 'bootstrap/dist/css/bootstrap.min.css'
+// 全局样式
+import '@/assets/global.css'
+
+Vue.config.productionTip = false
+
+new Vue({
+  render: h => h(App),
+    
+  // 在 Vue 项目中，使用路由就必须把路由实例对象，
+  // 通过 router: 路由的实例对象  的方式进行挂载
+  router
+}).$mount('#app')
+
+```
+
+
+
+#### 路由规则
+
+
+
+> 在路由模块下与组件创建关联
+
+* 需要导入关联的模块
+* 在实例下创建路由规则
+
+```js
+// router/index.js
+
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+
+import Home from '@/components/Home'
+import About from '@/components/About'
+import Movie from '@/components/Movie'
+
+// 调用 Vue.use()函数，把VueRouter 安装为 Vue插件
+
+Vue.use(VueRouter)
+
+// 创建路由实例对象
+const router = new VueRouter({
+    routes:[
+        {path:'/home',component:Home},
+        {path:'/about',component:About},
+        {path:'/movie',component:Movie},
+    ]
+})
+
+// 向外共享路由实例对象
+export default router
+
+```
+
+> 在APP.vue 组件创建`router-view>`
+
+```vue
+    <a href="#/home">首页</a>
+    <a href="#/movie">电影</a>
+    <a href="#/about">关于</a>
+    <hr />
+
+<!--    <Home></Home>-->
+<!--    <Movie></Movie>-->
+<!--    <About></About>-->
+    <router-view></router-view>
+```
+
+* 使用`router-link`代替`a`标签
+  * 不用添加`#`
+
+```vue
+      <router-link to="/home">首页</router-link>
+      <router-link to="/movie">电影</router-link>
+      <router-link to="/about">关于</router-link>
+```
+
+
+
+#### 路由重定向
+
+> 用户在访问 **地址A** 的时候，**强制用户跳转到**地址C
+
+> redirect
+
+* 解决了在打开时候页面访问`#/`无内容的状况
+* `{path:'/',redirect:'/home'},`
+
+```js
+// 创建路由实例对象
+const router = new VueRouter({
+    routes:[
+        // 重定向规则
+        {path:'/',redirect:'/home'},
+        // 路由规则
+        {path:'/home',component:Home},
+        {path:'/about',component:About},
+        {path:'/movie',component:Movie},
+    ]
+})
+
+```
+
+
+
+### 嵌套路由
+
+通过路由实现**组件的嵌套展示**，
+
+> 本身就由路由创建的组件，内部再添加路由显示子级模块内容
+
+子级路由链接
+
+```vue
+<router-link to='/about/tabel_1'>tabel_1</router-link>
+<router-link to='/about/tabel_2'>tabel_2</router-link>
+```
+
+
+
+>  声明子路由规则
+
+```vue
+// About.vue
+    <h3>About 组件</h3>
+    <router-link to='/about/Tab1'>tab1</router-link>
+    <router-link to='/about/Tab2'>tab2</router-link>
+    <hr/>
+    <router-view></router-view>
+```
+
+子路由规则前面不加`/`
+```js
+// index.js
+// 路由规则
+
+    routes:[
+        // 重定向规则
+        {path:'/',redirect:'/home'},
+        // 路由规则
+        {path:'/home',component:Home},
+        {path:'/movie',component:Movie},
+        
+        {path:'/about',component:About,
+            children:[
+            // 子路由规则
+                {path:'Tab1',component:Tab1},
+                {path:'Tab2',component:Tab2},
+            ]},
+    ]
+```
+
+> 子路由重定向
+
+```js
+// index.js
+
+        {path:'/about',component:About,
+            redirect:'/about/Tab1',
+            children:[
+            // 子路由规则
+                {path:'Tab1',component:Tab1},
+                {path:'Tab2',component:Tab2},
+            ]},
+```
+
+> 默认子路由
+
+* 如果`children`数组中，某个路由规则的 `path`值为空字符串，则这条路由叫做“默认子路由”
+  * 需要同时删除`<router-lint to>`(子路由链接)中的 引用
+
+```js
+
+        {path:'/about',component:About,
+            children:[
+            // 子路由规则
+                // 默认子路由
+                {path:'',component:Tab1},
+                {path:'Tab2',component:Tab2},
+            ]},
+```
+
+
+
+### 动态路由匹配
+
+> 把 `Hash`地址中**可变的部分**定义为**参数项**，从而**提升路由规则的复用性**
+
+在vue-router 中使用 **英文的冒号`:`**定义路由的参数项
+
+在 Movie 组件中，希望根据 id 的值，展示对应电影的详细信息
+
+```vue
+// APP.vue 组件
+// 通过使用动态参数项实现多个子组件界面的切换
+
+      <router-link to="/movie/1">洛基</router-link>
+      <router-link to="/movie/2">雷神</router-link>
+      <router-link to="/movie/3">复联</router-link>
+      <router-link to="/movie/4">死侍</router-link>
+```
+
+
+
+> 路由中的动态参数
+
+`{path:'/movie/:id',compenent:Movie}`
+
+```js
+        // 在Movie组件中，根据id的值，展示电影的详细信息
+        {path:'/movie/:id',component:Movie},
+```
+
+
+
+> this.$route 是路由的参数对象
+>
+> this.$router是路由的导航对象
+
+* 获取动态路由的页面id,在Movie组件中
+  * `this.$toute.params.id`
+  * 也可以通过动态路由的 `props`属性
+  * 就可以在 Movie组件中使用动态参数项 id
+
+```js
+{path:'/movie/:mid',component:Movie,props:true},
+```
+
+```vue
+// Movie.vue
+props:['id'],
+```
+
+
+
+#### 路径参数
+
+> 在 hash 地址中，`/`后面的参数项，叫做 "路径参数"
+
+在路由'参数对象'中，需要使用 `this.$route.params`来访问路径参数
+
+
+
+> 在 Hash 地址中，`?`后面的参数项，叫做 “ 查询参数”
+
+在路由'参数对象'中，需要使用`this.$route.query`来访问查询参数
+
+
+
+> 在`this.$route`中，`fullPath`是完整的地址，`path`是路径部分
+
+
+
+### 导航
+
+
+
+#### 声明式导航
+
+>  在浏览器中，**点击链接**实现导航的方式，叫做**声明式导航**
+
+* 在普通网页中点击`<a>链接`，在vue中点击`<router-link>`都属于声明式导航
+
+
+
+#### 编程式导航
+
+> 在浏览器中，**调用 API 方法**实现导航的方式，叫做**编程式导航**
+
+* 使用`location.href`跳转到新的页面的方式
+
+
+
+#### vue-router 中编程式导航的 API
+
+* `this.$router.push('hash地址')`
+  * 跳转到指定的 Hash 地址，并增加一条历史记录
+
+```vue
+methods:{
+	gotoLk(){
+	this.$router.push('/movie/1');
+	}
+}
+```
+
+
+
+* `this.$router.replace('hash 地址')`
+  * 跳转到指定地址，并且替换掉当前的历史记录
+
+
+
+* `this.$router.go(数值n)`
+  * 浏览历史中的前进和后退
+  * **负数**是后退
+  * **正数**是前进
+  * 如果后退或者前进的页面超出上限，则原地不动
+
+
+
+* `$router.back()`
+  * 后退一页
+* `$router.forward()`
+  * 前进一页
+
+
+
+> 在行内使用编程式导航的时候，this 必须要省略
+
+```vue
+<button @click='$router.back()'>后退</button>
+```
+
+
+
+#### 导航守卫
+
+> 控制路由的访问权限
+
+
+
+#### 全局前置守卫
+
+`router.beforEach(fn)`
+
+* 调用路由实例对象的 beforeEach 方法，即可声明 “全局前置守卫”
+* 每次发生**路由导航 的跳转**的时候，都会**自动触发 fn** 这个 “回调函数”
+
+
+
+#### 守卫方法的三个形参
+
+* `to`
+  * 将要访问的路由的信息对象
+* `from`
+  * 将要离开的路由的信息对象
+* `next`
+  * 是一个函数，调用 `next()`，表示放行，允许这次路由导航
+
+
+
+> next() 的调用方式
+
+* 直接放行
+  * `next()`
+* 跳转到其他页面
+  * `next('/logon')`
+* 不允许跳转,强制停留在当前页面
+  * `next(false)`
+
+```js
+router.beforeEach(function (to, from, next) {
+    // 如果要访问 ’/movie/2‘ 就跳转到 '/home'
+    if (to.path === '/movie/2') {
+        next('/home')
+    }
+    // 其他情况放行，不加则不会放行
+    next()
+})
+```
+
