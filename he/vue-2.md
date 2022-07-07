@@ -1,3 +1,16 @@
+
+
+> npm run serve 启动服务异常
+
+* 运行`$env:NODE_OPTIONS="--openssl-legacy-provider"`
+* 再启动服务
+
+> 部分包无法下载
+
+* 在下载命令后面添加 `--legacy-peer-deps`指令
+
+
+
 ## 动态组件
 
 > 动态切换页面上组件的**显示与隐藏**
@@ -344,7 +357,7 @@ router，对应关系
   * 哈希地址相当于锚点链接`#`，页面产生上下跳转和历史记录的变化
   * URL 中的`#`和`#`后面的都是Hash 地址
 
-
+> 哈希地址里面的地址要**小写**
 
 ### 路由的工作方式
 
@@ -773,5 +786,128 @@ router.beforeEach(function (to, from, next) {
     // 其他情况放行，不加则不会放行
     next()
 })
+```
+
+
+
+# 项目创建
+
+1. 准备好的文件夹下打开终端
+
+2. 执行命令`vue create demo-项目名称`
+
+3. 选择预设，
+> Manually select features (手动安装)
+4. 选择需要安装的模块
+4. 若选择路由则选择使用历史模式的路由，一般选 NO
+4. 选择CSS预处理器
+4. ESLint规范选择
+
+> ESLint + Standard config (标准规范)
+
+8. 保存的时候进行格式检查
+
+> Lint on save
+
+9. 将所选的模块的配置文件单独存储
+
+> In dedicated config files
+
+10. 是否存为预设
+
+
+
+## 项目结构
+
+#### components
+
+不是通过路由切换，可复用的组件放到components文件夹
+
+#### views
+
+通过路由进行切换的组件放入 view
+
+
+
+
+
+## Vant组件库
+
+[Vant官网]([Vant 2 - 轻量、可靠的移动端组件库 (gitee.io)](https://vant-contrib.gitee.io/vant/v2/#/zh-CN/))
+
+* 一次性导入所有组件
+  * 但是代码包体积变大
+  * 不过后期可以优化掉
+* 按需导入，很多配置
+
+
+
+> 一次性导入
+
+```js
+import Vue from 'vue';
+import Vant from 'vant';
+import 'vant/lib/index.css';
+
+Vue.use(Vant);
+```
+
+> 一次性导入之后，直接使用组件即可
+
+```vue
+<van-button type="primary">主要按钮</van-button>
+<van-button type="info">信息按钮</van-button>
+<van-button type="default">默认按钮</van-button>
+<van-button type="warning">警告按钮</van-button>
+<van-button type="danger">危险按钮</van-button>
+```
+
+
+
+#### 覆盖第三方组件的样式
+
+> 如果覆盖不了，就在类名的前面添加一个`/deep`
+
+
+
+> 在添加自定义属性的类型的时候，可以通过数组的方法定义多个
+
+```js
+    comm: {
+      type: [Number, String],
+      default: ''
+    },
+```
+
+
+
+> 在使用组件的时候，如果某个属性的名字是**小驼峰**的形式，则绑定属性的时候，建议修改为**连字符小写的**格式
+
+```vue
+commCount :{
+          type: [Number, String],
+      default: ''
+},
+    
+    
+<ArtItem :comm-count='this.count'></ArtItem>
+```
+
+
+
+
+
+### vue项目打包
+
+#### 使用 `file`协议
+
+* 通过 `vue-cli `配置`vue.config.js`文件
+* 使用空格和`./`是可以使用文件方式打开
+* 使用 `/` 是使用 `http`协议打开
+
+```js
+module.exports = {
+  publicPath: ''
+}
 ```
 
