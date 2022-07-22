@@ -68,13 +68,13 @@
 
 #### 导入 fs
 
-```
+```js
 const fs = require('fs')
 ```
 
 #### 读取文件
 
-```
+```js
 // 导入fs模块
 const fs = require('fs')
 
@@ -949,4 +949,360 @@ app.use(express.static('public'))
 
 * express 在指定的静态目录中查找文件，并提供对外资源的访问路径
   * **静态资源的目录名中不会出现在 URL 中**
+
+```js
+const express = require('express')
+
+const app = express()
+
+// 调用express.static方法，快速对外提供静态资源
+app.use(express.static('./src'))
+
+app.listen(8000, () => {
+    console.log('express server running at http://127.0.0.1:8000')
+})
+```
+
+
+
+#### 托管多个静态资源
+
+> 托管多个静态资源目录，**多次调用`express.static`**
+
+* express.static() 函数会**根据目录的添加顺序查找**所需要的文件
+* 同名只会访问前面的那个调用的目录
+
+
+
+#### 挂载路径前缀
+
+> 托管**静态资源资源访问路径**之前，**挂载路径前缀**
+
+```js
+app.use('/public',express,static('public'))
+```
+
+* ​	添加路径才能访问
+
+
+
+### nodemon
+
+> 监听代码的变动，当代码被修改后，nodemon会**自动重启项目**
+
+`npm i -g nodemon`
+
+
+
+## express 路由
+
+> 路由：就是映射关系
+
+> express 中，路由就是指**客户端的请求**与**服务器处理函数**之间的**映射关系**
+
+express的路由分为3部分
+
+1. 请求的类型
+2. 请求的URL地址
+3. 处理函数
+
+```js
+app.METHOD(PATH,HANDLER)
+```
+
+```js
+app.get('/home',function(req.res{}))
+```
+
+
+
+### 路由的匹配过程
+
+> 每当一个请求到达服务器之后，**需要先经过路由的匹配**，只有匹配成功之后，才会处理对应的处理函数
+
+* 匹配时，**会按照路由的匹配顺序进行匹配**
+* 如果请求类型和请求的URL同时匹配成功，则才会交给对应的function函数处理
+
+-
+
+### 路由模块
+
+> 路由直接挂载到app上，会导致代码量过多，**不便于对代码的管理**
+
+* **推荐将路由挂载抽离为单独的模块**
+
+1. 创建路由模块对应的 .js 文件
+2. 调用 `express.Router()`函数创建路由对象
+3. 向路由对象上挂载具体的路由
+4. 使用`module.exports`向外共享路由对象
+5. 使用`app.use`函数注册路由模块
+
+
+
+```js
+const express = require('express')
+const app = express()
+
+// 导入路由模块
+const router = require('./router模块')
+
+// 注册路由模块
+// app.use()注册全局中间件
+app.use(router)
+
+app.listen(8080,()=>{
+    console.log('http:127.0.0.1:8080')
+})
+```
+
+```js
+// 模块化
+const express = require('express')
+const router = express.Router()
+router.get('/user',(res,req)=>{
+    console.log('This a user page')
+})
+router.post('/login',(res,req)=>{
+    console.log('this a login page')
+})
+
+module.exports = router
+```
+
+
+
+### exress中间件
+
+> 当一个请求到达 Express 的服务之后，可以连续调用多个中间件，从而对这次请求进行预处理
+
+
+
+#### 中间件格式
+
+> 本质上是一个 function 处理函数
+
+* 中间件函数的形参列表中，**必须包含 next 函数**
+* 而路由只处理函数中只包含 req 和 res
+
+```js
+app.get('/',function(req,res.next){})
+```
+
+
+
+##### next 函数
+
+实现**多个中间件连续调用**的关键，表示吧流转关系转交给下一个**中间件**或者**路由**
+
+```js
+// 全局中间件
+
+app.use(function(req,res,next){
+    console.log('这是一个简单的中间件函数')
+    next()
+})
+```
+
+
+
+#### 中间件的作用
+
+>  多个中间件之间，**共享同一份 req 和 res**
+
+* 不需要在每一个路由中都添加相同的代码
+
+```js
+const express = require('express')
+
+const app = express()
+
+// 添加中间件
+app.use((req, res, next) => {
+    const time = Date.now()
+
+    // 为req 挂载自定义属性，从而把时间共享给后面所有的路由
+    req.startTime = time
+    next()
+})
+app.get('/user', (req, res) => {
+    console.log('user page' + req.startTime)
+    res.send('user page' + req.startTime)
+})
+
+app.post('/login', (req, res) => {
+    console.log('login page' + req.startTime)
+    res.send('login page' + req.startTime)
+})
+app.listen(8000, () => {
+    console.log('http://127.0.0.1:8000')
+})
+```
+
+#### 多个全局中间件
+
+通过`app.use()`**连续定义**多个全局中间件，请求到达服务器后，**会按照中间件定义的先后顺序依次进行调用**
+
+
+
+#### 局部生效的中间件
+
+**不使用`app.use()`定义的中间件，就是局部生效的中间件**
+
+```js
+// 定义局部中间件
+const mm = (req,res,next)=>{
+    console.log('调用了局部生效的中间件')
+
+    next()
+}
+app.get('/user',mm,(req,res)=>{
+    res.send('user page')
+})
+```
+
+* 使用多个局部中间件
+  * 在中间使用逗号分割多个中间件
+  * 也可以是用数组的方式使用
+
+
+
+##### 注意事项
+
+1. **一定要在路由之前注册中间件**
+2. 客户端发来的请求可以连续调用多个中间件进行处理
+3. 执行完中间件代码后，需要添加 next()
+4. next() 后面不要添加额外代码
+5. 连续调用多个中间件时候，多个中间件之间，**共享**req和res对象
+
+
+
+#### 中间件分类
+
+##### 应用级别
+
+通过 `app.use()`,`app.get()`,`app.post()`，**绑定到 app 实例上的中间件**，就叫做应用级别的中间件
+
+
+
+##### 路由级别
+
+通过 `express.Router()`实例上的中间件，**路由级别中间件绑定到 router 实例上**
+
+
+
+##### 错误级别
+
+**作用：**专门用来捕获整个项目中发生的异常错误，而防止项目异常奔溃的问题
+
+**格式：**中间件中必须要有4个形参，顺序从前到后，`(err, req, res, next)`
+
+* 错误级别的中间件必须**注册在所有路由之后**
+
+
+
+```js
+const express = require('express')
+const app = express()
+
+app.get('/name', (req, res) => {
+    // 人为的制造错误
+    throw new Error('发生了错误')
+    res.send('Home page')
+})
+app.use((err, req, res, next) => {
+    console.log('发生了错误' + err)
+    res.send('Error' + err.message)
+})
+app.listen(8000, () => {
+    console.log('http:localhost:8000')
+})
+```
+
+```js
+// 输出
+Error发生了错误
+```
+
+
+
+###### throw
+
+**`throw`语句**用来抛出一个用户自定义的异常。当前函数的执行将被停止（`throw`之后的语句将不会执行），并且控制将被传递到调用堆栈中的第一个[`catch`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/try...catch)块。如果调用者函数中没有`catch`块，程序将会终止。
+
+###### req.body
+
+`req.body`用来接收客户端发送过来的请求体数据
+
+默认情况下，如果不配置解析表单数据的中间件，则`req.body` 默认等于 `undefined`
+
+
+
+##### 内置中间件
+
+###### expresss.static
+
+托管静态资源的内置中间件
+
+###### express.json
+
+解析 JSON 格式的请求体数据 （在expresss 4.16.0+ 版本可用）
+
+```js
+app.use(express.json())
+```
+
+默认情况下，如果不配置解析表单数据的中间件，则`req.body` 默认等于 `undefined`
+
+* 通过postman发送json到服务器
+
+```js
+app.use(express.json())
+
+app.post('/user',(req,res)=>{
+    console.log(req.body)
+    res.send('ok')
+})
+```
+
+
+
+###### express.urlencoded
+
+解析URL-encoded 格式的请求体数据 （在expresss 4.16.0+ 版本可用）
+
+```js
+app.use(express.urlencoded( {  extende  :  false } ) )
+```
+
+```js
+app.use(express.urlencoded({extended:false}))
+
+app.post('/book',(req,res)=>{
+    console.log(req.body)
+    res.send('ok')
+})
+```
+
+##### 第三方中间件
+
+由第三方开发出来的中间件，**需要进行下载并配置**
+
+###### body-parser
+
+在4.16.0之前使用`body-parser`来解析请求体数据,内置的urlencoded是通过body-parser封装出的
+
+安装：`npm install body-parser`
+
+导入：`require('body-parser')`
+
+注册：`app.use()`
+
+```js
+const parser = require('body-parser')
+app.use(parser.urlencoded({extended:false}))
+```
+
+
+
+##### 自定义中间件
 
