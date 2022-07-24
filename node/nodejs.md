@@ -1306,3 +1306,149 @@ app.use(parser.urlencoded({extended:false}))
 
 ##### 自定义中间件
 
+> 自定义一个读取数据的中间件
+
+
+
+
+
+## express 接口
+
+> 先创建一个路由模块
+
+```js
+// 路由
+
+const express = require('express')
+
+const router = express.Router()
+
+
+module.exports = router
+```
+
+#### get接口
+
+```js
+router.get('/get', (req, res) => {
+    // 获取客户端发回的查询字符串，发送的服务器的数据
+    const query = req.query
+
+    res.send({
+        status: 0,
+        msg: 'GET 请求成功',
+        data: query
+    })
+
+})
+```
+
+#### post接口
+
+```js
+router.post('/post',(req,res)=>{
+    let body = req.body
+    res.send({
+        status:1,
+        msg:'POST 请求成功',
+        data:body
+    })
+})
+```
+
+
+
+### 解决跨域问题
+
+> GET和POST接口的一个问题，**不支持请求跨域**
+
+* CORS（主流方案）
+* JSONP （只支持GET请求）
+
+#### cors中间件解决跨域问题
+
+> CORS ,跨域资源共享
+>
+> 由一些**HTTP响应头**组成，**这些HTTP响应头决定浏览器是否阻止前端 JS 代码跨域资源共享**
+
+> 浏览器的同源安全策略默认会阻止“跨域”获取资源，但如果接口服务器**配置了CORS相关的HTTP响应头**，就可以解决浏览器前端的跨域访问限制
+
+
+
+1. 安装：`npm install cors`
+2. 导入：`const cors = require('cors')`
+3. 在路由之前调用`app.use(cors())`**配置中间件**
+4. 就可以解决跨域问题
+
+
+
+#### CORS 响应头部
+
+
+
+##### Access-Control-Allow-Origin
+
+指定了字段的值为**通配符`*`**,表示允许来自任何域的请求
+
+```js
+res.setHeader( ' Access-Control-Allow-Otigin ' , " * " )
+```
+
+
+
+##### Access-Control-Allow-Header
+
+> 默认情况下，CORS仅支持**客户端向服务器**发送的 9 个**请求头**
+
+如果客户端向服务器**发送了额外的请求头信息**满足需要在**服务器端**，通过`Access-Control-Allow-Header`**对额外的请求头进行声明**，否则这次请求会失败
+
+```js
+res.setHeader( ' Access-Control-Allow-Headers' , 'Content-Type ,  X-Custom-Header ' )
+```
+
+
+
+##### Access-Control-Allow-Methods
+
+> 默认情况下，CORS 仅支持客户端发起的 GET ，POST ， HEAD 请求
+
+如果客户端希望通过 **PUT，DELETE** 等方式请求服务器的资源，则需要在服务器端，通过`Access-Control-Allow-Methods`来**指明实际请求所允许使用的 HTTP 方法**
+
+```js
+// 只允许 POST ，GET ，DELETE ， HEAD 请求方法
+res.setHeader( ' Access-Control-Allow-Methods ' , 'POST , GET , DELETE , HEAD ' )
+// 允许所有的 HTTP 请求方法
+res.setHeader(' Access-Control-Allow-Methods ' , ' * ')
+```
+
+#### 简单请求
+
+> 客户端与服务器直接**只会发生一次请求**
+
+![image-20220723124321171](D:/Code/md/some-note-md/img/node/%E7%AE%80%E5%8D%95%E8%AF%B7%E6%B1%82.png)
+
+#### 预检请求
+
+> 客户端与服务器之间会发生两次请求，**OPTION 预检请求成功之后，才会发起真正的请求**
+
+![image-20220723124523798](D:/Code/md/some-note-md/img/node/%E9%A2%84%E6%A3%80%E8%AF%B7%E6%B1%82.png)
+
+
+
+在浏览器与服务器正式通信之前，浏览器会**先发送 OPTION 请求进行预检，以获知服务器是否允许该实际请求**，所以这一次的 OPTION 请求称为“预检请求”。**服务器成功响应预检请求后，才会发送真正的请求，并携带真实数据**
+
+
+
+### JSONP
+
+> 浏览器端通过`<script>`标签的 `src`属性，请求服务器上的数据，同时，服务器返回一个函数的调用，这种请求方式叫做JSONP
+
+特点：
+
+* JSONP不属于真正的Ajax请求，因为它没有使用`XMLHttpRequest`这个对象
+* JSONP仅支持GET请求，不支持POST，PUT，DELETE 等请求
+
+在项目中已经配置了CORS跨域资源共享，需要在配置CORS的组件之前声明JSONP的接口，
+
+否则JSONP接口会被处理成开启了CORS的接口
+
