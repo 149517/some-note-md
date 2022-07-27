@@ -1448,7 +1448,49 @@ res.setHeader(' Access-Control-Allow-Methods ' , ' * ')
 * JSONP不属于真正的Ajax请求，因为它没有使用`XMLHttpRequest`这个对象
 * JSONP仅支持GET请求，不支持POST，PUT，DELETE 等请求
 
-在项目中已经配置了CORS跨域资源共享，需要在配置CORS的组件之前声明JSONP的接口，
+在项目中已经配置了CORS跨域资源共享，需要在配置CORS的组件**之前**声明JSONP的接口，
 
 否则JSONP接口会被处理成开启了CORS的接口
+
+> 必须在 cors 之前使用，否则会变成cors的接口
+
+实现步骤
+
+1. **获取**客户端发送回来的**回调函数的名字**
+2. **得到要**通过JSONP形式**发送给客户端的数据**
+3. 根据前两部的数据，**拼接出一个函数调用的字符串**
+4. 把字符串**响应**给客户端的`<script>`标签进行解析
+
+
+
+```js
+// 服务器
+// jsonp 接口
+app.get('/api/jsonp',(req,res)=>{
+    // 获取客户端发送的回调函数名
+    const funcName = req.query.callback
+    const data = {
+        "name":'ww',
+        "age":20
+    }
+    // 拼接一个函数调用的字符串
+    const scriptStr = `${funcName}(${JSON.stringify(data)})`
+    res.send(scriptStr)
+})
+```
+
+```js
+        $('#jsonp').on('click',function (){
+            $.ajax({
+                type:'GET',
+                url:'http://127.0.0.1:8000/api/jsonp',
+                dataType:'jsonp',   // 表示要加载jsonp的数据请求
+                data:{id:2},
+                success:(res)=>{
+                    console.log(res)
+                }
+            })
+        })
+
+```
 
