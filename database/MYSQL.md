@@ -696,3 +696,200 @@ REVOKE 权限列表 ON 数据库名.表名 FROM '用户名'@'主机名';
 * 多个权限直接使用逗号分割
 * 授权时，数据库和表名可以使用 * 进行通配，代表所有
 
+
+
+## 函数
+
+#### 字符串函数
+
+| **函  数**                     | **功  能**                                                   |
+| ------------------------------ | ------------------------------------------------------------ |
+| **CONCAT(str1,str2,...,strn)** | 将str1,str2,...,strn连接为一个完整的字符串                   |
+| INSERT(str,x,y,instr)          | 将字符串str从第x开始，y个字符串长度的子串替换为字符串instr   |
+| LOWER(str)                     | 将字符串str中的所有字母变成小写                              |
+| UPPER(str)                     | 将字符串str中的所有字母变成大写                              |
+| LEFT(str,x)                    | 返回字符串最左边的x个字符                                    |
+| RIGHT(str,x)                   | 返回字符串最右边的x个字符                                    |
+| **LPAD**(str,n,pad)            | 使用字符串pad对字符串str最**左边进行填充**，直到长度为n个字符长度 |
+| **RPAD**(str,n,pad)            | 使用字符串pad对字符串str最**右边进行填充**，直到长度为n个字符长度 |
+| **LTRIM**(str)                 | 去掉str左边的空格                                            |
+| **RTRIM(str)**                 | 去掉str右边的空格                                            |
+| REPEAT(str,x)                  | 返回字符串str重复x次的结果                                   |
+| REPLACE(str,a,b)               | 使用字符串b替换字符串str中所有出现的字符串a                  |
+| STRCMP(str1,str2)              | 比较字符串str1和str2                                         |
+| **TRIM**(str)                  | 去掉字符串行头和行尾的空格                                   |
+| **SUBSTRING**(str,x,y)         | 返回字符串str中从x位置起y个字符串长度的字符串                |
+
+* 实例
+
+```sql
+select concat('Hello',' mysql');
+
+//  Hello mysql
+```
+
+* 在工号前面补0
+
+```sql
+update emp set workno = lpad(workno,5,'0');
+```
+
+
+
+#### 数值函数
+
+| **函  数**     | **功  能**                     |
+| -------------- | ------------------------------ |
+| ABS(x)         | 返回数值x的绝对值              |
+| **CEIL**(x)    | 返回大于或等于x的最小整数值    |
+| **FLOOR**(x)   | 返回小于或等于x的最大整数值    |
+| **MOD**(x,y)   | 返回x除以y的余数               |
+| **RAND**()     | 返回0~1内的随机数              |
+| **ROUND**(x,y) | 返回x四舍五入后有y位小数的数值 |
+| TRUNCATE(x,y)  | 返回数值x且截断为y位小数的数值 |
+
+* 6位验证码
+
+```sql
+select lpad(round(rand()*1000000,0 ),6,0)
+```
+
+
+
+#### 日期函数
+
+| **函  数**                        | **功  能**                                          |
+| --------------------------------- | --------------------------------------------------- |
+| **CURDATE**()                     | 获取当前日期                                        |
+| **CURTIME**()                     | 获取当前时间                                        |
+| **NOW**()                         | 获取当前的日期和时间                                |
+| **DATEDIFF(date1,date2)**         | 返回起始时间**date1和结束时间**date2之间的天数      |
+| UNIX_TIMESTAMP(date)              | 获取日期的UNIX时间戳                                |
+| FROM_UNIXTIME()                   | 获取UNIX时间戳的日期值                              |
+| WEEK(date)                        | 返回日期date为一年中的第几天                        |
+| DAY(date)                         | 获取指定date的日期                                  |
+| **YEAR**(date)                    | 返回日期date的年份                                  |
+| HOUR(time)                        | 返回时间time的小时值                                |
+| MINUTE(time)                      | 返回时间time的分钟值                                |
+| MONTHNAME(date)                   | 返回时间date的月份                                  |
+| DATE_ADD(data,INTERVAL expt type) | 返回一个日期/时间、值加上一个时间间隔expr后的时间值 |
+
+```sql
+select datediff(curdate(), '2022-08-26');
+select date_add(now(), INTERVAL 70 DAY);
+```
+
+
+
+* 根据员工入职天数，并根据入职天数倒叙排列
+
+```sql
+select name, datediff(curdate(),entrydate) as 'entrydays' from emp order by entrydays desc;
+```
+
+
+
+#### 流程控制函数
+
+| **函数**                                                   | **功能**                                        |
+| ---------------------------------------------------------- | ----------------------------------------------- |
+| IF(expr1,expr2,expr3)                                      | 如果expr1是真, 返回expr2, 否则返回expr3         |
+| IFNULL(expr1,expr2)                                        | 如果expr1不是NULL,返回expr1,否则返回expr2       |
+| CASE WHEN [value1] THEN[result1]… ELSE[default] END        | 如果value是真, 返回result1,否则返回default      |
+| CASE [expr] WHEN [value1] THEN[result1]… ELSE[default] END | 如果expr等于value1, 返回result1,否则返回default |
+
+*  查询员工的姓名和工作地址，（北京，上海---->一线城市，其他改为 二线城市
+
+```sql
+select
+	name,
+	(case workaddress when '北京' then '一线城市' when '上海' then '一线城市' else '二线城市' end) as '工作地址'
+from emp;
+```
+
+* 根据成绩划分等级
+
+```sql
+select
+    id,
+    name,
+    (case when math >= 85 then '优秀' when math >= 60 then '及格' else '不及格' end) '数学',
+    (case when english >= 85 then '优秀' when english >= 60 then '及格' else '不及格' end) '英语',
+    (case when chinese >= 85 then '优秀' when chinese >= 60 then '及格' else '不及格' end) '语文'
+from score;
+```
+
+ 
+
+## 约束
+
+> 作用于表中字段上的规则，用于限制存储在表中的数据
+>
+> 保证数据库中数据的正确性，有效性，完整性
+
+![image-20220731175604196](D:/Code/md/some-note-md/img/mysql/%E7%BA%A6%E6%9D%9F.png)
+
+
+
+**约束是作用于表中字段上的，可以在创建表/修改表的时候添加约束**
+
+```sql
+create table usrss(
+    # 主键约束，自动增长
+    id int primary key auto_increment comment '主键',
+    # 非空且唯一
+    name varchar(20) not null unique comment '姓名',
+    # 检查年龄大于0且小于120
+    age int check( age > 0 && age <= 120) comment '年龄',
+    # 默认样式为1
+    status char(1) default '1' comment '状态',
+    gender char(1) comment '性别'
+) comment '用户表';
+```
+
+#### 外键约束
+
+> 让两张表的数据之间建立连接，从而保证数据的一致性和完整性
+
+##### 添加外键
+
+```sql
+CREATE TABLE 表名(
+	字段名 数据类型,
+      [CONSTRAINT] [外键名称] ROREIGN KEY （外键字段名）REFERENCES 主表（主表列名）
+);
+```
+
+
+
+````sql
+ALTER TABLE 表名 ADD CONSTAAINT 外键名称 FOREIGN KEY (外键字段名) REFERENCES 主表（主表列名）;
+````
+
+
+
+##### 删除外键
+
+```sql
+ALTER TABLE 表名 DROP FOREIGN KEY 外键名称;
+```
+
+
+
+##### 删除更新行为
+
+![image-20220731182826319](D:/Code/md/some-note-md/img/mysql/%E5%88%A0%E9%99%A4%E6%9B%B4%E6%96%B0%E8%A1%8C%E4%B8%BA.png)
+
+
+
+```sql
+ALTER TABLE 表名 ADD COSTRAINT 外键名称 FOREIGN KEY (外键字段) REFERENCES 主表名(主表字段名) ON UPDATE CASCADE ON DELETE CASCADE;
+```
+
+* on update 在更新时候的操作
+* on delect 在删除的操作
+
+
+
+## 多表查询
+
