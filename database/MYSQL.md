@@ -431,3 +431,268 @@ SELECT DISINCT 字段列表 FROM 表名;
 
 #### 条件查询
 
+```sql
+SELECT 字段列表 FROM 表名 WHERE 条件列表;
+```
+
+* 条件
+
+![](D:/Code/md/some-note-md/img/mysql/%E6%9D%A1%E4%BB%B6%E6%9F%A5%E8%AF%A2.png)
+
+* between ... and ... 
+  * between 后面跟的是小的数字
+  * and 后面是大的数，反过来则查找不到
+
+* in
+
+  * 没有in
+
+  * ```sql
+    select * from emp where age =18 or age = 20 or age = 40
+    ```
+
+  * in写法
+
+  * ```SQL
+    select * from emp where age in(18,20,40)
+    ```
+
+* like
+
+  * 下划线按字符个数查询
+
+    * 查询名字为2个字符的信息
+
+  * ```sql
+    select * from emp where name like '__'
+    ```
+
+  * 百分号匹配任意字符
+
+    * 查询身份证末尾特定的'x'字符
+
+  * ```sql
+    select * from emp where name like '%x';
+    ```
+
+  * ```sql
+    select * from emp where name like '_________________x'
+    ```
+
+
+
+#### 聚合函数
+
+> 将一列数据作为一个整体，进行纵向计算
+
+* **常见的聚合函数**
+
+![image-20220729103136396](D:/Code/md/some-note-md/img/mysql/%E5%B8%B8%E8%A7%81%E7%9A%84%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0.png)
+
+* 语法
+
+```sql
+SELECT 聚合函数（字段列表） FROM 表名;
+```
+
+* null 不参与聚合函数的计算
+
+
+
+统计数量
+
+```sql
+select count(id) from emp;
+```
+
+
+
+#### 分组查询
+
+**group by**
+
+```sql
+SELECT 字段列表 FROM 表名 [WHERE 条件] GROUP BY 分组字段名 [HAVING 分组后的过滤条件]
+```
+
+
+
+where 和 having 的区别
+
+* 执行机制不同：where是分组之前进行过滤，不满足where条件，不参与分组；
+  * 而having是分组之后对结果进行过滤
+* 判断条件不同：where不能对聚合函数进行判断，
+  * 而having可以
+
+**注意**
+
+* 执行顺序：where > 聚合函数 > having
+* 分组之后，查询的字段一般为聚合函数和分段函数，查询其他字段无任何意义
+
+
+
+#### 排序查询
+
+**order by**
+
+```sql
+SELECT 字段列表 FROM 表名 ORDER BY 字段1 排序方式1 , 字段2 排序方式2;
+```
+
+
+
+**排序方式**
+
+* ASC 
+  * 升序，（默认值）
+* DESC
+  * 降序
+
+
+
+**多字段排序，当第一个字段值相同时候，才会根据第二个字段进行排序**
+
+
+
+#### 分页查询
+
+```sql
+SELECT 字段列表 FROM 表名 LIMIT 起始索引，查询记录数;
+```
+
+
+
+**注意**
+
+* 起始索引从 0 开始，起始索引 = （ 查询页码  -  1 ） *  每页显示记录数
+* 分页查询是数据库的方言，不同的数据库中有不同的实现，MYSQL中是 LIMIT
+* 如果查询的是第一页数据，起始索引可以省略，直接简写为 limit 10 （10是记录数）
+
+
+
+##### 案例
+
+* 查询年龄为20,21,22的女性员工信息
+
+```sql
+select * from emp where gender = '女' age in(20,21,22);
+```
+
+* 查询性别为男，并且年龄在 20 - 40(含)岁之间的姓名为三个字的员工
+
+```sql
+select * from emp where gender = '男' age and (age between 20 and 40) and name like '___';
+```
+
+* 统计员工表中，年龄小于60，男性员工和女性员工的人数
+
+```sql
+select gender , count(*) from emp where age <  60 group by gender
+```
+
+* 查询所有年龄小于35岁，员工的姓名和年龄，并对结果进行升序排序，如果年龄相同则按照入职时间降序排列
+
+```sql
+select name , age from emp where age <= 35 order by age , entrydate desc;
+```
+
+* 查询性别为男，且年龄在20-40岁（含） 内的前5个员工的信息，对查询结果按年龄升序排列，年龄相同则按入职时间进行升序排列
+
+```sql
+select * from emp where age between 20 and 40  order by age , entrydata limit 5;
+```
+
+
+
+#### 执行顺序
+
+![image-20220731102149873](D:/Code/md/some-note-md/img/mysql/DQL%E7%9A%84%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F%E5%92%8C%E7%BC%96%E5%86%99%E9%A1%BA%E5%BA%8F.png)
+
+![image-20220731102633429](D:/Code/md/some-note-md/img/mysql/DQL%E5%B0%8F%E7%BB%93.png)
+
+
+
+### DCL
+
+>  数据控制语言，用来管理数据库用户，控制数据库的访问权限
+
+开发人员操作较为少，主要是 DBA（数据库管理员）使用
+
+#### 管理用户
+
+
+
+##### 查询用户
+
+```sql
+USE mysql;
+SELECT * FROM user;
+```
+
+* 系统的用户信息储存在 mysql 表中
+* 查询用户表就能够显示所有的用户信息
+
+
+
+##### 创建用户
+
+```sql
+CREATE USER '用户名' @ '主机名' IDENTIFIED BY '密码';
+```
+
+* localhost  本机
+* **% 任意主机**
+
+
+
+##### 修改用户密码
+
+```sql
+ALTER USER '用户名' @'主机名' IDENTIFIED WITH mysql_native_password BY '新密码';
+```
+
+
+
+##### 删除用户
+
+```sql
+DROP USER '用户名' @'主机名';
+```
+
+
+
+#### 权限控制
+
+![image-20220731113840108](D:/Code/md/some-note-md/img/mysql/%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6.png)
+
+
+
+##### 查询权限
+
+```sql
+SELECT GRANTS FOR '用户名' @'主机名';
+```
+
+
+
+##### 授予权限
+
+```sql
+GRANT 权限列表 ON 数据库名.表名 TO '用户名'@'主机名';
+```
+
+
+
+##### 撤销权限
+
+```SQL
+REVOKE 权限列表 ON 数据库名.表名 FROM '用户名'@'主机名';
+```
+
+
+
+**注意**
+
+* 多个权限直接使用逗号分割
+* 授权时，数据库和表名可以使用 * 进行通配，代表所有
+
