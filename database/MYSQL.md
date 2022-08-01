@@ -1558,3 +1558,5 @@ set session transaction isolation level read uncommitted ;
 set session transaction isolation level repeatable read ;
 ```
 
+**事务的隔离级别越高，数据越安全，但是性能越低**
+
