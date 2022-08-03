@@ -1,4 +1,4 @@
-# node (节点)
+# node
 
 > javascript借助node.js可以做后端开发
 >
