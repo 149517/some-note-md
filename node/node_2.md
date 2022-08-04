@@ -337,3 +337,130 @@ app.post('/api/logout', (req, res) => {
 
 ## JWT
 
+> 目前最流行的跨域认证解决方案
+
+### 工作原理
+
+![image-20220804085443124](D:/Code/md/some-note-md/img/node/JWT%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86.png)
+
+
+
+用户信息通过 Token 字符串的形式，保存在客户端浏览器中，服务器通过还原 Token 字符串的形式来认证用户的身份。
+
+
+
+#### JWT字符组成
+
+* 分为三部分组成，分别是**Header**(头部)，**Payload**(有效荷载)，**Signature**(签名)
+
+`Header.Payload.signature`
+
+* **Payload**部分**才是真正的用户信息**，它是用户信息通过加密之后生成的字符串。
+* Header和Signature是**安全性相关**的部分，只是为了保证 Token 的安全性。
+
+![image-20220804090531722](D:/Code/md/some-note-md/img/node/Token%E5%AD%97%E7%AC%A6%E4%B8%B2.png)
+
+
+
+#### 使用方式
+
+> 客户端收到服务器返回的 JWT 后，通常会将它储存在 **localStorage** 或 **sessionStorage**中
+
+此后，客户端每次与服务器通信，都要带上JWT 字符串，进行身份认证，
+
+推荐的做法是**把JWT放在HTTP请求头的 `Authorization`字段中**
+
+```js
+Authorization:Bearer <token>
+```
+
+
+
+### 在Express中使用JWT
+
+#### 安装
+
+`npm install jsonwebtoken express-jwt`
+
+* `jsonwebtoken`用于**生成 JWT 字符串**
+* `express-jwt`用于**将 JWT 字符串解析还原成 JSON 对象**
+
+
+
+#### 定义secret秘钥
+
+> 为了**保证 JWT 字符串的安全性**，防止 JWT 字符串在网络传输过程中被别人破解，需要专门定义一个用于**加密**和**解密**的secret秘钥
+
+* 生成的JWT 字符串的时候，需要使用secret秘钥对信息**进行加密**，最终得到加密好的JWT字符串
+* 把JWT字符串解析还原成JSON对象的时候，需要使用 secret 秘钥**进行解密**
+
+```js
+// TODO_02：定义 secret 密钥，建议将密钥命名为 secretKey
+const secretKey = 'today O^*^O';
+```
+
+
+
+#### 加密
+
+* 不要把密码加密到token字符串中
+
+```js
+// TODO_03：在登录成功之后，调用 jwt.sign() 方法生成 JWT 字符串。并通过 token 属性发送给客户端
+// 调用jwt.sign 生成JWT字符串，三个参数分别是：用户信息对象，加密秘钥，配置对象
+const tokenStr = jwt.sign({username: userinfo.username}, secretKey, {expirsIn: '30s'});
+res.send({
+    status: 200,
+    message: '登录成功！',
+    token: tokenStr // 要发送给客户端的 token 字符串
+})
+```
+
+
+
+#### 字符串还原
+
+```js
+// TODO_04：注册将 JWT 字符串解析还原成 JSON 对象的中间件
+// 使用 unless方法配置不需要访问权限的接口
+//只要配置了 express-jet 这个中间件，就可以把解析出来的用户信息，挂载到 req.user 属性上
+
+app.use(expressJWT({secret: secretKey}).unless({path: [/^\/api\//]}))
+```
+
+
+
+#### 获取用户信息
+
+* 只要配置了 express-jet 这个中间件，就可以把解析出来的用户信息，挂载到 req.user 属性上
+
+```js
+// 这是一个有权限的 API 接口
+app.get('/admin/getinfo', function (req, res) {
+    // TODO_05：使用 req.user 获取用户信息，并使用 data 属性将用户信息发送给客户端
+    res.send({
+        status: 200,
+        message: '获取用户信息成功！',
+        data: req.user // 要发送给客户端的用户信息
+    })
+})
+```
+
+#### 捕获解析 JWT 失败后产生的结果
+
+```js
+// TODO_06：使用全局错误处理中间件，捕获解析 JWT 失败后产生的错误
+app.use((err, req, res, next) => {
+    // 这次错误是由 token 解析失败导致的
+    if (err.name === 'UnauthorizedError') {
+        return res.send({
+            status: 401,
+            message: '无效的token',
+        })
+    }
+    res.send({
+        status: 500,
+        message: '未知的错误',
+    })
+})
+```

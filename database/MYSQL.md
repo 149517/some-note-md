@@ -6,7 +6,7 @@
 
 ### 常见数据库及其分类
 
-![image-20220724101859423](D:/Code/md/some-note-md/img/mysql/%E5%B8%B8%E8%A7%81%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8F%8A%E5%85%B6%E5%88%86%E7%B1%BB.png)
+![](D:/Code/md/some-note-md/img/mysql/%E5%B8%B8%E8%A7%81%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8F%8A%E5%85%B6%E5%88%86%E7%B1%BB.png)
 
 
 
@@ -14,7 +14,7 @@
 
 分为**数据库、数据表、数据行、字段**这四大部分
 
-![image-20220724110709640](D:/Code/md/some-note-md/img/mysql/%E4%BC%A0%E7%BB%9F%E5%9E%8B%E6%95%B0%E6%8D%AE%E7%BB%84%E7%BB%87%E7%BB%93%E6%9E%84.png)
+![](D:/Code/md/some-note-md/img/mysql/%E4%BC%A0%E7%BB%9F%E5%9E%8B%E6%95%B0%E6%8D%AE%E7%BB%84%E7%BB%87%E7%BB%93%E6%9E%84.png)
 
 
 
@@ -84,7 +84,7 @@ mysql -u root -P 13360 -p
 
 #### 数据模型
 
-![image-20220727223805101](D:/Code/md/some-note-md/img/mysql/%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B.png)
+![](D:/Code/md/some-note-md/img/mysql/%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B.png)
 
 
 
