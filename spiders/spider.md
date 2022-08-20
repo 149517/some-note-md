@@ -318,17 +318,17 @@ fp.close()
 
 | 特别字符 | 描述                                                         |
 | :------- | :----------------------------------------------------------- |
-| $        | 匹配输入字符串的结尾位置。如果设置了 RegExp 对象的 Multiline 属性，则 $ 也匹配 '\n' 或 '\r'。要匹配 $ 字符本身，请使用 \$。 |
-| ( )      | 标记一个子表达式的开始和结束位置。子表达式可以获取供以后使用。要匹配这些字符，请使用 \( 和 \)。 |
-| *        | 匹配前面的子表达式零次或多次。要匹配 * 字符，请使用 \*。     |
-| +        | 匹配前面的子表达式一次或多次。要匹配 + 字符，请使用 \+。     |
-| .        | 匹配除换行符 \n 之外的任何单字符。要匹配 . ，请使用 \. 。    |
-| [        | 标记一个中括号表达式的开始。要匹配 [，请使用 \[。            |
-| ?        | 匹配前面的子表达式零次或一次，或指明一个非贪婪限定符。要匹配 ? 字符，请使用 \?。 |
-| \        | 将下一个字符标记为或特殊字符、或原义字符、或向后引用、或八进制转义符。例如， 'n' 匹配字符 'n'。'\n' 匹配换行符。序列 '\\' 匹配 "\"，而 '\(' 则匹配 "("。 |
+| $        | 匹配输入字符串的结尾位置。如果设置了 RegExp 对象的 Multiline 属性，则 $ 也匹配 '\n' 或 '\r'。要匹配 $ 字符本身，请使用` \$`。 |
+| ( )      | 标记一个子表达式的开始和结束位置。子表达式可以获取供以后使用。要匹配这些字符，请使用` \( `和` \)`。 |
+| *        | 匹配前面的子表达式零次或多次。要匹配 * 字符，请使用` \*`。   |
+| +        | 匹配前面的子表达式一次或多次。要匹配 + 字符，请使用 `\+`。   |
+| .        | 匹配除换行符 \n 之外的任何单字符。要匹配 . ，请使用` \. `。  |
+| [        | 标记一个中括号表达式的开始。要匹配 [，请使用` \[`。          |
+| ?        | 匹配前面的子表达式零次或一次，或指明一个非贪婪限定符。要匹配 ? 字符，请使用 `\?`。 |
+| \        | 将下一个字符标记为或特殊字符、或原义字符、或向后引用、或八进制转义符。例如， 'n' 匹配字符 'n'。'\n' 匹配换行符。序列 '`\\`' 匹配 "\"，而 '`\(`' 则匹配 "("。 |
 | ^        | 匹配输入字符串的开始位置，除非在方括号表达式中使用，当该符号在方括号表达式中使用时，表示不接受该方括号表达式中的字符集合。要匹配 ^ 字符本身，请使用 \^。 |
-| {        | 标记限定符表达式的开始。要匹配 {，请使用 \{。                |
-| \|       | 指明两项之间的一个选择。要匹配 \|，请使用 \|。               |
+| {        | 标记限定符表达式的开始。要匹配 {，请使用 `\{`。              |
+| \|       | 指明两项之间的一个选择。要匹配 \|，请使用` \|`。             |
 
 
 
@@ -425,6 +425,8 @@ xpath解析
 
 
 
+[python使用xpath（超详细） - 梦想家haima - 博客园 (cnblogs.com)](https://www.cnblogs.com/mxjhaima/p/13775844.html#开始使用)
+
 安装
 
 `pip install lxml`
@@ -453,6 +455,8 @@ etree.HTML(page_text)
 
 
 
+* 调用etree对象中的xpath方法结合者xpath表达式实现标签的约定和内容的捕获
+
 ```py
 tree = etree.HTML(respond)
 res = tree.xpath('/html/head/title')
@@ -470,9 +474,74 @@ res = tree.xpath('/html/head/title')
 
 
 
-* `[@]`添加属性
+* `[@]`属性定位
 
 ```py
 r = tree.xpath('//div[@class="song"]')
 ```
 
+
+
+* 索引定位
+  * 索引从1开始
+
+```py
+r = tree.xpath('//div[@class="song"]/p[3]')
+```
+
+
+
+
+
+* 取文本
+  * `/text()` 获取的是标签中直系的文本内容
+  * `//text()`获取的是该标签下的所有文本
+
+
+
+* 取属性
+  * `/@attrName` 获取标签属性
+
+
+
+##### xpath解析二手房数据
+
+```py
+import requests
+from lxml import etree
+import math
+
+url = 'https://honghe.58.com/luxixian/ershoufang'
+header = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36 Edg/104.0.1293.54'
+}
+res = requests.get(url=url, headers=header)
+print(res.status_code)
+
+tree = etree.HTML(res.text)
+
+title = tree.xpath('//div/h3/@title')
+owner = tree.xpath('//span[@class="property-extra-text"]//text()')
+price = tree.xpath('//p[@class="property-price-total"]//text()')
+count = 1
+pp = []
+for p in price:
+    if p != ' ':
+        pp.append(p)
+# print(pp)
+for t, o in zip(title, owner):
+    if count % 2 == 0:
+        print(o, end='   ')
+        print(pp[count - 2], end=' ')
+        print(pp[count - 1])
+    else:
+        print(math.ceil(count / 2), end='  ')
+        print(t, end='   ')
+        print(o, end='   ')
+    count += 1
+
+```
+
+
+
+> 在requests中，返回的网页数据乱码
